@@ -93,6 +93,8 @@ namespace Tumugu
             MarkdownTextBox.Text = text.ToString();
 
             Mouse.OverrideCursor = Cursors.IBeam;       // カーソルを戻す
+
+            RewriteMarkdownBrowser();
         }
 
         private void MarkdownTextBox_PreviewDragOver(object sender, DragEventArgs e)
@@ -118,7 +120,9 @@ namespace Tumugu
 
         private void MarkdownTextBox_PreviewDragLeave(object sender, DragEventArgs e)
         {
-            Mouse.OverrideCursor = Cursors.IBeam;       // カーソルを戻す
+            // ウィンドウ全体のカーソルをリセット
+            Mouse.OverrideCursor = null; 
+            this.Cursor = null;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -258,10 +262,11 @@ namespace Tumugu
                     </head>
                     <body>
                     <div id='content'>{htmlBody}</div>
-                    <div id=""content""></div>
                     </body>
                     </html>
                     ";
+            //                     <div id=""content""></div>
+
 
             // WebView2 に HTML を表示
             await MarkdownBrowser.EnsureCoreWebView2Async();
@@ -272,15 +277,17 @@ namespace Tumugu
 
         private void MarkdownTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            // Markdig を使う場合の変換
-            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-            var htmlBody = Markdown.ToHtml(MarkdownTextBox.Text, pipeline);
+            RewriteMarkdownBrowser();
 
-            //RewriteMarkdownBrowser();
+            //// Markdig を使う場合の変換
+            //var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            //var htmlBody = Markdown.ToHtml(MarkdownTextBox.Text, pipeline);
 
-            // チラつき防止のため、部分的に更新
-            var script = $"document.getElementById('content').innerHTML = `{htmlBody}`;";
-            MarkdownBrowser.ExecuteScriptAsync(script);
+            ////RewriteMarkdownBrowser();
+
+            //// チラつき防止のため、部分的に更新
+            //var script = $"document.getElementById('content').innerHTML = `{htmlBody}`;";
+            //MarkdownBrowser.ExecuteScriptAsync(script);
         }
 
         private void MarkdownTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)

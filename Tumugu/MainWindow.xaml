@@ -13,14 +13,14 @@
         TextElement.FontWeight="Medium"
         TextElement.FontSize="14"
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
-        Title="MainWindow" Height="650" Width="800" BorderThickness="1" WindowStartupLocation="Manual"
+        Title="MainWindow" Height="650" Width="900" BorderThickness="1" WindowStartupLocation="Manual"
         ResizeMode="CanResize" WindowStyle="None" Loaded="Window_Loaded">
     <!-- WindowChrome を使ってカスタムタイトルバーを作っている場合、
-CaptionHeight のデフォルト値（約 30px）が 「ドラッグ領域」として確保されるため、
-その高さ分だけ 上部に空白が強制的に入ります。
-    解決策：CaptionHeight="0" を明示的に指定する
-
--->
+         CaptionHeight のデフォルト値（約 30px）が 「ドラッグ領域」として確保されるため、
+         その高さ分だけ 上部に空白が強制的に入ります。
+         解決策：CaptionHeight="0" を明示的に指定する
+    -->
+    
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"
@@ -40,9 +40,9 @@ CaptionHeight のデフォルト値（約 30px）が 「ドラッグ領域」と
         <Grid Grid.Row="0" Height="45" Background="#FF4E4E4E" Margin="0, -5, 0, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="230"/>
-                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="125"/>
             </Grid.ColumnDefinitions>
 
             <!-- アイコン -->
@@ -83,28 +83,45 @@ CaptionHeight のデフォルト値（約 30px）が 「ドラッグ領域」と
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- Markdownの入力TextBox -->
-            <TextBox x:Name="MarkdownTextBox" Grid.Row="0" Grid.Column="0" 
+            <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A0A0A0" Background="White"
+                BorderThickness="1" CornerRadius="4" Margin="10,10,1,10">
+                <TextBox x:Name="MarkdownTextBox" 
                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                     FontSize="16" Margin="10" BorderThickness="1"
+                     FontSize="16" Margin="5" BorderThickness="0"
                      AllowDrop="True" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
                      Drop="MarkdownTextBox_Drop" PreviewDragOver="MarkdownTextBox_PreviewDragOver"
                      TextChanged="MarkdownTextBox_TextChanged"
                      PreviewMouseWheel="MarkdownTextBox_PreviewMouseWheel" PreviewDragLeave="MarkdownTextBox_PreviewDragLeave"/>
+            </Border>
 
             <!-- TextBoxとWebView2の中央に左右の画面サイズ変更のため配置 -->
-            <GridSplitter Grid.Row="1" Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="LightGray" ShowsPreview="True"/>
-
+            <GridSplitter Grid.Row="1" Grid.Column="1" Width="6" HorizontalAlignment="Center">
+                <GridSplitter.Style>
+                    <Style TargetType="GridSplitter">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Cursor" Value="SizeWE"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#414141"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </GridSplitter.Style>
+            </GridSplitter>
+                  
             <!-- MarkdownのPreview(HTML) -->
             <!-- MarkdownをHTMLで表示するため、NugetからMicrosoft.Web.WebView2をインストール -->
-            <wv2:WebView2 x:Name="MarkdownBrowser" Grid.Row="1" Grid.Column="2" Margin="10"/>
+            <Border Grid.Row="1" Grid.Column="2" BorderBrush="#A0A0A0" Background="{x:Null}"
+                Panel.ZIndex="1" BorderThickness="1" CornerRadius="4" Margin="0, 10, 10, 10">
+                <wv2:WebView2 x:Name="MarkdownBrowser" Panel.ZIndex="2" Margin="5"/>
+            </Border>
         </Grid>
-
 
         <Grid Grid.Row="2" Height="30" Background="#414141">
             <Grid.ColumnDefinitions>
@@ -112,7 +129,7 @@ CaptionHeight のデフォルト値（約 30px）が 「ドラッグ領域」と
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0 評価版" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0" FontSize="12"/>
+            <Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0 評価版" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>
         </Grid>
     </Grid>
 </Window>
