@@ -41,12 +41,13 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="85"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="125"/>
             </Grid.ColumnDefinitions>
 
             <!-- アイコン -->
-            <materialDesign:PackIcon Kind="MaterialDesign" Grid.Column="0" Foreground="White" Height="35" Width="35" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <materialDesign:PackIcon Kind="ChartBubble" Grid.Column="0" Foreground="White" Height="35" Width="35" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
             <!-- タイトル -->
             <Canvas Grid.Column="1">
@@ -63,8 +64,14 @@
                 </Button>
             </StackPanel>
 
+            <Label x:Name="lblTitleBlankArea" Grid.Column="3" 
+                       Background="Transparent" 
+                       HorizontalAlignment="Stretch" 
+                       VerticalAlignment="Stretch" MouseDoubleClick="lblTitleBlankArea_MouseDoubleClick"
+                       />
+
             <!-- ウィンドウのボタン -->
-            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="BtnMinimize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnMinimize_Click" ToolTip="最小化" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Minus" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
@@ -119,7 +126,7 @@
             <!-- MarkdownをHTMLで表示するため、NugetからMicrosoft.Web.WebView2をインストール -->
             <Border Grid.Row="1" Grid.Column="2" BorderBrush="#A0A0A0" Background="{x:Null}"
                 Panel.ZIndex="1" BorderThickness="1" CornerRadius="4" Margin="0, 10, 10, 10">
-                <wv2:WebView2 x:Name="MarkdownBrowser" Panel.ZIndex="2" Margin="5"/>
+                <wv2:WebView2 x:Name="MarkdownBrowser" AllowDrop="False" Cursor="Arrow" Panel.ZIndex="2" Margin="5" DragOver="MarkdownBrowser_DragOver"/>
             </Border>
         </Grid>
 

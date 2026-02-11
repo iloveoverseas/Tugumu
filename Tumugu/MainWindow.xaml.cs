@@ -29,6 +29,9 @@ namespace Tumugu
         {
             InitializeComponent();
 
+            // WebView2 の初期化と、ドラッグオーバー・ドロップイベントの無効化スクリプトの登録
+            InitializeWebView();
+
             // 現在のモニタに合わせた作業領域を取得
             Rect workArea = ScreenHelper.GetCurrentWorkArea(this);
 
@@ -318,10 +321,43 @@ namespace Tumugu
 
         private void BtnMaximize_Click(object sender, RoutedEventArgs e)
         {
+            ChangeWindowStage();
+        }
+
+        private void ChangeWindowStage()
+        {
             // WPFで WindowState = WindowState.Maximized; にした際、通常はOSがタスクバー（下のメニュー）を避けて最大化してくれます。
             // しかし、WindowStyle = "None" を指定してカスタムウィンドウを作っている場合、タスクバーを覆い隠してフルスクリーンになってしまうというWPF特有の挙動があります。これをWindows 11のタスクバーを考慮したサイズにするには、主に2つの方法があります。
-
             this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
+        }
+
+        private async void InitializeWebView()
+        {
+            await MarkdownBrowser.EnsureCoreWebView2Async();
+
+            // ページロード時および遷移時に常に実行されるスクリプトを登録
+            await MarkdownBrowser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
+                window.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'none'; // カーソルを禁止にする
+                }, false);
+
+                window.addEventListener('drop', function(e) {
+                    e.preventDefault(); // ドロップ動作を無効化
+                }, false);
+            ");
+        }
+
+        private void MarkdownBrowser_DragOver(object sender, DragEventArgs e)
+        {
+            // ドラッグ操作を拒否し、禁止カーソルを表示させる
+            e.Effects = DragDropEffects.None;
+            e.Handled = true;
+        }
+
+        private void lblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ChangeWindowStage();
         }
     }
 }
