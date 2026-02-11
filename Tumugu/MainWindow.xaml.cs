@@ -1,4 +1,5 @@
 ﻿using Markdig;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.IO;
@@ -32,6 +33,10 @@ namespace Tumugu
             // WebView2 の初期化と、ドラッグオーバー・ドロップイベントの無効化スクリプトの登録
             InitializeWebView();
 
+            // WPF の WebView2 はブラウザ内部の右クリックを直接 WPF 側で拾えないため、CoreWebView2 のイベントを使って右クリックを検出します。
+            MarkdownBrowser.CoreWebView2InitializationCompleted += MarkdownBrowser_CoreWebView2InitializationCompleted;
+
+
             // 現在のモニタに合わせた作業領域を取得
             Rect workArea = ScreenHelper.GetCurrentWorkArea(this);
 
@@ -55,6 +60,31 @@ namespace Tumugu
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void MarkdownBrowser_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
+        {
+            // 右クリックイベントをフック
+            MarkdownBrowser.CoreWebView2.ContextMenuRequested += CoreWebView2_ContextMenuRequested;
+        }
+
+        private void CoreWebView2_ContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
+        {
+            e.Handled = true; // 標準メニューを消す
+
+            var menu = new System.Windows.Controls.ContextMenu();
+
+            var printItem = new System.Windows.Controls.MenuItem();
+            printItem.Header = "印刷";
+            printItem.Click += (s, ev) =>
+            {
+                MarkdownBrowser.CoreWebView2.ShowPrintUI();
+            };
+
+            menu.Items.Add(printItem);
+
+            // 右クリック位置に表示
+            menu.IsOpen = true;
         }
 
         // DPIを考慮した「物理ピクセル」を取得する
@@ -95,7 +125,7 @@ namespace Tumugu
 
             MarkdownTextBox.Text = text.ToString();
 
-            Mouse.OverrideCursor = Cursors.IBeam;       // カーソルを戻す
+            Mouse.OverrideCursor = null;        // カーソルを戻す
 
             RewriteMarkdownBrowser();
         }
@@ -324,6 +354,13 @@ namespace Tumugu
             ChangeWindowStage();
         }
 
+        private void lblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ChangeWindowStage();
+
+            ChangeMarkdownTextBoxWidth(999);
+        }
+
         private void ChangeWindowStage()
         {
             // WPFで WindowState = WindowState.Maximized; にした際、通常はOSがタスクバー（下のメニュー）を避けて最大化してくれます。
@@ -355,9 +392,34 @@ namespace Tumugu
             e.Handled = true;
         }
 
-        private void lblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+
+        private void ChangeMarkdownTextBoxWidth(double percent)
         {
-            ChangeWindowStage();
+            if (percent == 999) 
+            {
+                percent = 50;
+            }
+
+            double newValue = (this.Width) * (percent / 100);
+            
+            var current = TextBoxColumn.Width;          // 現在の幅（GridLength）を取得
+            TextBoxColumn.Width = new GridLength(newValue, current.GridUnitType);
         }
+
+        private void Btn0Percent_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeMarkdownTextBoxWidth(0);
+        }
+
+        private void Btn25Percent_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeMarkdownTextBoxWidth(25);
+        }
+
+        private void Btn50Percent_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeMarkdownTextBoxWidth(50);
+        }
+
     }
 }

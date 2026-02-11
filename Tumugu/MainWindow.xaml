@@ -90,9 +90,9 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition x:Name="TextBoxColumn" Width="300" />
                 <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="MarkdownBrowserColumn" Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- Markdownの入力TextBox -->
@@ -137,6 +137,12 @@
             </Grid.ColumnDefinitions>
 
             <Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0 評価版" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="Btn0Percent" Content="なし" Width="70" Background="DarkGray" Click="Btn0Percent_Click"></Button>
+                <Button x:Name="Btn25Percent" Content="25%" Width="70" Background="DarkGray" Click="Btn25Percent_Click"></Button>
+                <Button x:Name="Btn50Percent" Content="50%" Width="70" Background="DarkGray" Click="Btn50Percent_Click"></Button>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>
