@@ -20,7 +20,7 @@
          その高さ分だけ 上部に空白が強制的に入ります。
          解決策：CaptionHeight="0" を明示的に指定する
     -->
-    
+
     <WindowChrome.WindowChrome>
         <WindowChrome
             CaptionHeight="0"
@@ -64,11 +64,8 @@
                 </Button>
             </StackPanel>
 
-            <Label x:Name="lblTitleBlankArea" Grid.Column="3" 
-                       Background="Transparent" 
-                       HorizontalAlignment="Stretch" 
-                       VerticalAlignment="Stretch" MouseDoubleClick="lblTitleBlankArea_MouseDoubleClick"
-                       />
+            <Label x:Name="lblTitleBlankArea" Grid.Column="3" Background="Transparent" HorizontalAlignment="Stretch" 
+                       VerticalAlignment="Stretch" MouseDoubleClick="lblTitleBlankArea_MouseDoubleClick" />
 
             <!-- ウィンドウのボタン -->
             <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
@@ -90,21 +87,28 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="TextBoxColumn" Width="300" />
+                <ColumnDefinition x:Name="TextBoxColumn" Width="1*" />
                 <ColumnDefinition Width="10" />
-                <ColumnDefinition x:Name="MarkdownBrowserColumn" Width="*" />
+                <ColumnDefinition x:Name="MarkdownBrowserColumn" Width="3*" />
             </Grid.ColumnDefinitions>
 
             <!-- Markdownの入力TextBox -->
-            <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A0A0A0" Background="White"
-                BorderThickness="1" CornerRadius="4" Margin="10,10,1,10">
-                <TextBox x:Name="MarkdownTextBox" 
-                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                     FontSize="16" Margin="5" BorderThickness="0"
-                     AllowDrop="True" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
-                     Drop="MarkdownTextBox_Drop" PreviewDragOver="MarkdownTextBox_PreviewDragOver"
-                     TextChanged="MarkdownTextBox_TextChanged"
-                     PreviewMouseWheel="MarkdownTextBox_PreviewMouseWheel" PreviewDragLeave="MarkdownTextBox_PreviewDragLeave"/>
+            <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A0A0A0" Background="White" BorderThickness="1" CornerRadius="4" Margin="10,10,1,10">
+                <RichTextBox x:Name="RichMarkdownTextBox" Grid.Row="0" Grid.Column="0" Background="White" Margin="5"
+                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True"
+                            AllowDrop="True" TextChanged="RichTextBox_TextChanged" PreviewMouseWheel="RichMarkdownTextBox_PreviewMouseWheel"
+                            FontFamily="Consolas" FontSize="16" Drop="RichMarkdownTextBox_Drop" PreviewDragOver="RichMarkdownTextBox_PreviewDragOver" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <RichTextBox.Resources>
+                        <Style TargetType="{x:Type Paragraph}">
+                            <Setter Property="LineHeight" Value="16" />
+                            <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+                            <Setter Property="Margin" Value="0" />
+                        </Style>
+                    </RichTextBox.Resources>
+                    <FlowDocument>
+                        <Paragraph></Paragraph>
+                    </FlowDocument>
+                </RichTextBox>
             </Border>
 
             <!-- TextBoxとWebView2の中央に左右の画面サイズ変更のため配置 -->
@@ -121,7 +125,7 @@
                     </Style>
                 </GridSplitter.Style>
             </GridSplitter>
-                  
+
             <!-- MarkdownのPreview(HTML) -->
             <!-- MarkdownをHTMLで表示するため、NugetからMicrosoft.Web.WebView2をインストール -->
             <Border Grid.Row="1" Grid.Column="2" BorderBrush="#A0A0A0" Background="{x:Null}"
@@ -139,9 +143,9 @@
             <Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0 評価版" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button x:Name="Btn0Percent" Content="なし" Width="70" Background="DarkGray" Click="Btn0Percent_Click"></Button>
-                <Button x:Name="Btn25Percent" Content="25%" Width="70" Background="DarkGray" Click="Btn25Percent_Click"></Button>
-                <Button x:Name="Btn50Percent" Content="50%" Width="70" Background="DarkGray" Click="Btn50Percent_Click"></Button>
+                <Button x:Name="Btn0Percent" Content="なし" Width="70" Height="25" Background="DarkGray" Click="Btn0Percent_Click" />
+                <Button x:Name="Btn25Percent" Content="25%" Width="70" Height="25" Background="DarkGray" Click="Btn25Percent_Click"></Button>
+                <Button x:Name="Btn50Percent" Content="50%" Width="70" Height="25" Background="DarkGray" Click="Btn50Percent_Click"></Button>
             </StackPanel>
         </Grid>
     </Grid>

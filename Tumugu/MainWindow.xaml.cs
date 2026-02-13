@@ -1,15 +1,17 @@
 ﻿using Markdig;
-using MaterialDesignThemes.Wpf;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
-using static ScreenHelper;
+using System.Windows.Shapes;
 
 namespace Tumugu
 {
@@ -20,11 +22,6 @@ namespace Tumugu
     {
         // Folder where images will be saved. Defaults to application folder, updated when a .md file is opened via drag-and-drop.
         private string _currentSaveFolder;
-
-        // Zoom support for the Markdown TextBox via mouse wheel + Ctrl
-        private double _markdownFontSizeDefault = 12.0;
-        private double _markdownFontSizeMin = 6.0;
-        private double _markdownFontSizeMax = 48.0;
 
         public MainWindow()
         {
@@ -60,6 +57,20 @@ namespace Tumugu
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void lblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ChangeWindowStage();
+
+            ChangeMarkdownTextBoxWidth(999);
+        }
+
+        private void ChangeWindowStage()
+        {
+            // WPFで WindowState = WindowState.Maximized; にした際、通常はOSがタスクバー（下のメニュー）を避けて最大化してくれます。
+            // しかし、WindowStyle = "None" を指定してカスタムウィンドウを作っている場合、タスクバーを覆い隠してフルスクリーンになってしまうというWPF特有の挙動があります。これをWindows 11のタスクバーを考慮したサイズにするには、主に2つの方法があります。
+            this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
         }
 
         private void MarkdownBrowser_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
@@ -106,49 +117,25 @@ namespace Tumugu
             return (physicalWidth, physicalHeight);
         }
 
-
-        private void MarkdownTextBox_Drop(object sender, DragEventArgs e)
-        {
-            // ファイルがドロップされていなければ終了
-            if (e.Data.GetDataPresent(DataFormats.FileDrop) == false)
-            {
-                return;
-            }
-
-            var dropFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
-
-            string droppedFileFullPath = dropFiles[0];
-            string directoryPath = Path.GetDirectoryName(droppedFileFullPath);
-            _currentSaveFolder = directoryPath;
-
-            string text = File.ReadAllText(droppedFileFullPath, Encoding.UTF8);
-
-            MarkdownTextBox.Text = text.ToString();
-
-            Mouse.OverrideCursor = null;        // カーソルを戻す
-
-            RewriteMarkdownBrowser();
-        }
-
         private void MarkdownTextBox_PreviewDragOver(object sender, DragEventArgs e)
         {
-            var drugFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
+            //var drugFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
 
-            string drugFileFullPath = drugFiles[0];
+            //string drugFileFullPath = drugFiles[0];
 
-            // ファイルが1つだけで、拡張子が .md なら受け入れ
-            if (drugFiles.Length == 1 && Path.GetExtension(drugFileFullPath) == ".md")
-            {
-                e.Effects = DragDropEffects.Copy;
-                Mouse.OverrideCursor = Cursors.Hand;
-            }
-            else
-            {
-                e.Effects = DragDropEffects.None;
-                Mouse.OverrideCursor = null;
-            }
+            //// ファイルが1つだけで、拡張子が .md なら受け入れ
+            //if (drugFiles.Length == 1 && Path.GetExtension(drugFileFullPath) == ".md")
+            //{
+            //    e.Effects = DragDropEffects.Copy;
+            //    Mouse.OverrideCursor = Cursors.Hand;
+            //}
+            //else
+            //{
+            //    e.Effects = DragDropEffects.None;
+            //    Mouse.OverrideCursor = null;
+            //}
 
-            e.Handled = true;
+            //e.Handled = true;
         }
 
         private void MarkdownTextBox_PreviewDragLeave(object sender, DragEventArgs e)
@@ -160,14 +147,17 @@ namespace Tumugu
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            RewriteMarkdownBrowser();
+            //RewriteMarkdownBrowser();
         }
 
         private async void RewriteMarkdownBrowser()
         {
+            if (MarkdownBrowser == null) return;
+
             // Markdown → HTML Markdig を使う場合の変換
             var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-            var htmlBody = Markdown.ToHtml(MarkdownTextBox.Text, pipeline);
+            string plainText = GetPlainTextFromRichTextBox(RichMarkdownTextBox);
+            var htmlBody = Markdown.ToHtml(plainText, pipeline);
 
             // 最低限の CSS を付与（白基調・読みやすい
             var htmlTemplate = $@"
@@ -308,9 +298,9 @@ namespace Tumugu
             MarkdownBrowser.CoreWebView2.NavigateToString(htmlTemplate);
         }
 
-        private void MarkdownTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void MarkdownTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            RewriteMarkdownBrowser();
+            //RewriteMarkdownBrowser();
 
             //// Markdig を使う場合の変換
             //var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
@@ -323,27 +313,6 @@ namespace Tumugu
             //MarkdownBrowser.ExecuteScriptAsync(script);
         }
 
-        private void MarkdownTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            // Ctrl キーが押されていなければ終了
-            if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control) return;
-
-            // フォントサイズ調整
-            if (MarkdownTextBox.FontSize == 0) MarkdownTextBox.FontSize = _markdownFontSizeDefault;
-
-            // ホイールの回転方向でフォントサイズを増減
-            if (e.Delta > 0)
-            {
-                MarkdownTextBox.FontSize = Math.Min(_markdownFontSizeMax, MarkdownTextBox.FontSize + 1);
-            }
-            else if (e.Delta < 0)
-            {
-                MarkdownTextBox.FontSize = Math.Max(_markdownFontSizeMin, MarkdownTextBox.FontSize - 1);
-            }
-
-            e.Handled = true;
-        }
-
         private void BtnMinimize_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
@@ -354,19 +323,7 @@ namespace Tumugu
             ChangeWindowStage();
         }
 
-        private void lblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            ChangeWindowStage();
 
-            ChangeMarkdownTextBoxWidth(999);
-        }
-
-        private void ChangeWindowStage()
-        {
-            // WPFで WindowState = WindowState.Maximized; にした際、通常はOSがタスクバー（下のメニュー）を避けて最大化してくれます。
-            // しかし、WindowStyle = "None" を指定してカスタムウィンドウを作っている場合、タスクバーを覆い隠してフルスクリーンになってしまうというWPF特有の挙動があります。これをWindows 11のタスクバーを考慮したサイズにするには、主に2つの方法があります。
-            this.WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
-        }
 
         private async void InitializeWebView()
         {
@@ -393,17 +350,16 @@ namespace Tumugu
         }
 
 
-        private void ChangeMarkdownTextBoxWidth(double percent)
+        private void ChangeMarkdownTextBoxWidth(double ratio)
         {
-            if (percent == 999) 
+            // WindowタイトルのlblTitleBlankAreaをダブルクリックで最大化/元に戻すとき、ここに999が渡されるようにしている
+            if (ratio == 999) 
             {
-                percent = 50;
+                return;
             }
 
-            double newValue = (this.Width) * (percent / 100);
-            
-            var current = TextBoxColumn.Width;          // 現在の幅（GridLength）を取得
-            TextBoxColumn.Width = new GridLength(newValue, current.GridUnitType);
+            // MarkdownTextBoxColumnの幅を変更
+            TextBoxColumn.Width = new GridLength(ratio, GridUnitType.Star);
         }
 
         private void Btn0Percent_Click(object sender, RoutedEventArgs e)
@@ -413,13 +369,198 @@ namespace Tumugu
 
         private void Btn25Percent_Click(object sender, RoutedEventArgs e)
         {
-            ChangeMarkdownTextBoxWidth(25);
+            ChangeMarkdownTextBoxWidth(1);
         }
 
         private void Btn50Percent_Click(object sender, RoutedEventArgs e)
         {
-            ChangeMarkdownTextBoxWidth(50);
+            ChangeMarkdownTextBoxWidth(3);
         }
 
+        private bool _isChanging = false; // 無限ループ防止フラグ
+
+        // RichTextBox からプレーンテキストを取得する
+        private string GetPlainTextFromRichTextBox(RichTextBox rtb)
+        {
+            // RichTextドキュメントの全範囲(ContentStartからContentEndまで)を指定
+            TextRange textRange = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd);
+
+            return textRange.Text.Trim();
+        }
+
+        private bool _isInternalChanging = false; // 内部的な変更中かどうかを保持
+
+        private void RichTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // ズーム中（内部変更中）なら何もしない
+            if (_isInternalChanging) return;
+
+            // プログラムによる変更時は処理をスキップ
+            if (_isChanging) return;
+
+            _isChanging = true;
+
+            // sender を RichTextBox のインスタンスとして取得
+            var rtb = sender as RichTextBox;
+            if (rtb == null)
+            {
+                _isChanging = false;
+                return;
+            }
+
+            // BeginChange / EndChange はインスタンスメソッドなので rtb 経由で呼ぶ
+            rtb.BeginChange();
+            try
+            {
+                ApplyHeadingHighlighting(rtb);
+            }
+            finally
+            {
+                rtb.EndChange();
+                _isChanging = false;
+            }
+
+            RewriteMarkdownBrowser();
+        }
+
+        private void ApplyHeadingHighlighting(RichTextBox rtb)
+        {
+            if (rtb?.Document == null) return;
+
+            // RichTextBox内の全ブロックをループ
+            foreach (var block in rtb.Document.Blocks)
+            {
+                if (block is Paragraph paragraph)
+                {
+                    // 段落のテキストを取得
+                    TextRange range = new TextRange(paragraph.ContentStart, paragraph.ContentEnd);
+                    string text = range.Text.TrimStart(); // 行頭の空白を除去して判定
+
+                    if (IsMarkdownLine(text))
+                    {
+                        paragraph.Background = Brushes.GhostWhite;
+                        paragraph.Foreground = Brushes.SteelBlue;
+                        paragraph.FontWeight = FontWeights.Bold;
+                    }
+                    else
+                    {
+                        // 条件に合わない場合は標準の色に戻す
+                        paragraph.Background = Brushes.White;
+                        paragraph.Foreground = Brushes.Black;
+                        paragraph.FontWeight = FontWeights.Normal;
+                    }
+                }
+            }
+        }
+
+        private void RichMarkdownTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                _isInternalChanging = true; // ★フラグを立てる
+
+                try
+                {
+                    double currentSize = RichMarkdownTextBox.FontSize;
+                    double newSize;
+
+                    // 1. フォントサイズの増減計算
+                    if (e.Delta > 0) newSize = currentSize + 2;
+                    else newSize = currentSize - 2;
+
+                    // 制限範囲内なら適用
+                    if (newSize >= 10 && newSize <= 60)
+                    {
+                        // 2. RichTextBox自体のFontSizeを更新
+                        RichMarkdownTextBox.FontSize = newSize;
+
+                        // 3. 適正な LineHeight を計算（例：フォントサイズの1.5倍）
+                        double multiplier = 1.5;
+                        double newLineHeight = newSize * multiplier;
+
+                        // 4. 全ての段落に適用（重要）
+                        foreach (var block in RichMarkdownTextBox.Document.Blocks)
+                        {
+                            if (block is Paragraph p)
+                            {
+                                p.LineHeight = newLineHeight;
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    _isInternalChanging = false; // ★必ず最後にfalseに戻す
+                }
+
+                e.Handled = true;
+            }
+        }
+
+        private void RichMarkdownTextBox_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                // ファイルパスの配列を取得（複数ドロップ対応のため配列）
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                LoadFileWithTextRange(files[0]);
+            }
+
+            RewriteMarkdownBrowser();
+        }
+
+        private void LoadFileWithTextRange(string filePath)
+        {
+            if (!File.Exists(filePath)) return;
+
+            // RichTextBoxの全範囲を指定
+            TextRange range = new TextRange(RichMarkdownTextBox.Document.ContentStart, RichMarkdownTextBox.Document.ContentEnd);
+
+            using (FileStream fs = new FileStream(filePath, FileMode.Open))
+            {
+                // DataFormats.Text を指定して読み込む
+                range.Load(fs, DataFormats.Text);
+            }
+        }
+
+        private void RichMarkdownTextBox_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            // ドロップされたものが「ファイル」である場合のみ、受け入れを許可するアイコンにする
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+
+            // イベントを完了（標準の動作を抑制）
+            e.Handled = true;
+        }
+
+        private bool IsMarkdownLine(string text)
+        {
+            // 行頭の空白をトリミングして判定
+            string line = text.TrimStart();
+
+            List<string> markdownKeywords = new List<string>
+            {
+                "#####", "####", "###", "##", "#", "```", "-", "---", ">"
+            };
+
+            List<Regex> MarkdownPatterns = new List<Regex>
+            {
+                //new Regex(@"^>+\s", RegexOptions.Compiled),             // 引用
+                //new Regex(@"^[-*]\s", RegexOptions.Compiled),           // リスト: - または *
+                new Regex(@"^#{1,5}\s", RegexOptions.Compiled),         // 見出し: #〜#####
+                //new Regex(@"^```", RegexOptions.Compiled),              // コードブロック
+                new Regex(@"^!\[.*?\]\(.*?\)", RegexOptions.Compiled)   // 画像構文
+            };
+
+            // LINQのAnyを使用して、1つでも一致(IsMatch)するものがあるか確認
+            return MarkdownPatterns.Any(reg => reg.IsMatch(line)); ;
+        }
     }
 }
