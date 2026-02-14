@@ -1,17 +1,17 @@
 ﻿using Markdig;
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace Tumugu
 {
@@ -20,8 +20,9 @@ namespace Tumugu
     /// </summary>
     public partial class MainWindow : Window
     {
-        // Folder where images will be saved. Defaults to application folder, updated when a .md file is opened via drag-and-drop.
-        private string _currentSaveFolder;
+        // 現在の保存先フォルダと編集中のファイル名を保持するフィールド
+        private string _currentEditFolder;
+        private string _currentEditFileName;
 
         public MainWindow()
         {
@@ -32,7 +33,6 @@ namespace Tumugu
 
             // WPF の WebView2 はブラウザ内部の右クリックを直接 WPF 側で拾えないため、CoreWebView2 のイベントを使って右クリックを検出します。
             MarkdownBrowser.CoreWebView2InitializationCompleted += MarkdownBrowser_CoreWebView2InitializationCompleted;
-
 
             // 現在のモニタに合わせた作業領域を取得
             Rect workArea = ScreenHelper.GetCurrentWorkArea(this);
@@ -48,15 +48,32 @@ namespace Tumugu
             this.Topmost = false;
 
             // default save folder
-            _currentSaveFolder = AppDomain.CurrentDomain.BaseDirectory;
-            _currentSaveFolder = @"C:\Develop\WpfStartSample\WpfStartSample\Doc";
+            _currentEditFolder = AppDomain.CurrentDomain.BaseDirectory;
+            _currentEditFolder = @"C:\Temp";
 
             (double physicalWidth, double physicalHeight) = GetScreenSize();
         }
 
-        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            //RewriteMarkdownBrowser();
+        }
+
+        private async void InitializeWebView()
+        {
+            await MarkdownBrowser.EnsureCoreWebView2Async();
+
+            // ページロード時および遷移時に常に実行されるスクリプトを登録
+            await MarkdownBrowser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
+                window.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'none'; // カーソルを禁止にする
+                }, false);
+
+                window.addEventListener('drop', function(e) {
+                    e.preventDefault(); // ドロップ動作を無効化
+                }, false);
+            ");
         }
 
         private void lblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -64,6 +81,21 @@ namespace Tumugu
             ChangeWindowStage();
 
             ChangeMarkdownTextBoxWidth(999);
+        }
+
+        private void BtnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void BtnMaximize_Click(object sender, RoutedEventArgs e)
+        {
+            ChangeWindowStage();
+        }
+
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
 
         private void ChangeWindowStage()
@@ -145,10 +177,7 @@ namespace Tumugu
             this.Cursor = null;
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            //RewriteMarkdownBrowser();
-        }
+
 
         private async void RewriteMarkdownBrowser()
         {
@@ -313,34 +342,11 @@ namespace Tumugu
             //MarkdownBrowser.ExecuteScriptAsync(script);
         }
 
-        private void BtnMinimize_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = WindowState.Minimized;
-        }
-
-        private void BtnMaximize_Click(object sender, RoutedEventArgs e)
-        {
-            ChangeWindowStage();
-        }
 
 
 
-        private async void InitializeWebView()
-        {
-            await MarkdownBrowser.EnsureCoreWebView2Async();
 
-            // ページロード時および遷移時に常に実行されるスクリプトを登録
-            await MarkdownBrowser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
-                window.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'none'; // カーソルを禁止にする
-                }, false);
 
-                window.addEventListener('drop', function(e) {
-                    e.preventDefault(); // ドロップ動作を無効化
-                }, false);
-            ");
-        }
 
         private void MarkdownBrowser_DragOver(object sender, DragEventArgs e)
         {
@@ -423,6 +429,7 @@ namespace Tumugu
             RewriteMarkdownBrowser();
         }
 
+        // RichTextBox内の段落をループして、Markdownの見出しやリストなどの行を判定し、条件に合う行に対して背景色や文字色を変更する
         private void ApplyHeadingHighlighting(RichTextBox rtb)
         {
             if (rtb?.Document == null) return;
@@ -430,6 +437,9 @@ namespace Tumugu
             // RichTextBox内の全ブロックをループ
             foreach (var block in rtb.Document.Blocks)
             {
+                if (_isSimpleEditMode) continue;
+
+                // シンプル編集モードならスキップ
                 if (block is Paragraph paragraph)
                 {
                     // 段落のテキストを取得
@@ -453,6 +463,7 @@ namespace Tumugu
             }
         }
 
+        // Ctrl + マウスホイールでフォントサイズを変更するイベントハンドラー
         private void RichMarkdownTextBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (Keyboard.Modifiers == ModifierKeys.Control)
@@ -501,27 +512,36 @@ namespace Tumugu
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                // ファイルパスの配列を取得（複数ドロップ対応のため配列）
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                string droppedFile = files[0];
 
-                LoadFileWithTextRange(files[0]);
+                try
+                {
+                    // RichTextBoxの操作範囲を確定
+                    var document = RichMarkdownTextBox.Document;
+                    TextRange range = new TextRange(document.ContentStart, document.ContentEnd);
+
+                    // ファイルを「読み取り専用」かつ「共有許可」で開く（他アプリが使用中でも開けるようにする）
+                    using (FileStream fs = new FileStream(droppedFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {                   
+                        range.Load(fs, DataFormats.Text);           // DataFormats.Text で読み込み
+                    }
+
+                    _currentEditFileName = droppedFile;
+                    _currentEditFolder = System.IO.Path.GetDirectoryName(droppedFile);
+
+                    lblEditFile.Content = _currentEditFileName;
+                    lblEditFile.Foreground = Brushes.Orange;
+                }
+                catch (Exception ex)
+                {
+                    // 6. ユーザーへの通知（ファイルがロックされている、権限がない等のエラー対応）
+                    MessageBox.Show($"ファイルの読み込みに失敗しました:\n{ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
+
 
             RewriteMarkdownBrowser();
-        }
-
-        private void LoadFileWithTextRange(string filePath)
-        {
-            if (!File.Exists(filePath)) return;
-
-            // RichTextBoxの全範囲を指定
-            TextRange range = new TextRange(RichMarkdownTextBox.Document.ContentStart, RichMarkdownTextBox.Document.ContentEnd);
-
-            using (FileStream fs = new FileStream(filePath, FileMode.Open))
-            {
-                // DataFormats.Text を指定して読み込む
-                range.Load(fs, DataFormats.Text);
-            }
         }
 
         private void RichMarkdownTextBox_PreviewDragOver(object sender, DragEventArgs e)
@@ -562,5 +582,65 @@ namespace Tumugu
             // LINQのAnyを使用して、1つでも一致(IsMatch)するものがあるか確認
             return MarkdownPatterns.Any(reg => reg.IsMatch(line)); ;
         }
+
+        private void BtnSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(_currentEditFileName)) return;
+
+            // RichTextBox 全文を TextRange として取得
+            var textRange = new TextRange(RichMarkdownTextBox.Document.ContentStart, RichMarkdownTextBox.Document.ContentEnd);
+
+            // プレーンテキストとして保存
+            File.WriteAllText(_currentEditFileName, textRange.Text);
+            lblEditFile.Foreground = Brushes.White;
+        }
+
+        private void BtnFolder_Click(object sender, RoutedEventArgs e)
+        {
+            ShowSaveDialog();
+
+            //Process.Start("explorer.exe", _currentEditFolder);
+
+        }
+
+        private void chkSimpleEdit_Checked(object sender, RoutedEventArgs e)
+        {
+            _isSimpleEditMode = true;
+            chkSimpleEdit.Foreground = Brushes.White;
+        }
+
+        private bool _isSimpleEditMode = true;
+        private void chkSimpleEdit_Unchecked(object sender, RoutedEventArgs e)
+        {
+            _isSimpleEditMode = false;
+            chkSimpleEdit.Foreground = Brushes.DarkGray;
+        }
+
+        public void ShowSaveDialog()
+        {
+            var dialog = new SaveFileDialog
+            {
+                Title = "名前を付けて保存",
+                Filter = "マークダウンファイル (*.md)|*.md",
+                FileName = "新しいファイル.md",
+                InitialDirectory = "C:\\"
+            };
+
+            if (string.IsNullOrEmpty(_currentEditFileName) == false)
+            {
+                dialog.InitialDirectory = System.IO.Path.GetDirectoryName(_currentEditFileName);
+                dialog.FileName = System.IO.Path.GetFileName(_currentEditFileName);
+            }
+
+            if (dialog.ShowDialog() == true)
+            {
+                // 選択されたファイルパス
+                string path = dialog.FileName;
+
+                // 保存処理（例：空ファイルを作成）
+                System.IO.File.WriteAllText(path, "");
+            }
+        }
+
     }
 }

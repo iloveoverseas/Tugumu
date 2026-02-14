@@ -41,26 +41,36 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="85"/>
+                <ColumnDefinition Width="130"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="125"/>
             </Grid.ColumnDefinitions>
 
             <!-- アイコン -->
-            <materialDesign:PackIcon Kind="ChartBubble" Grid.Column="0" Foreground="White" Height="35" Width="35" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <materialDesign:PackIcon Kind="ChartBubble" Grid.Column="0" Foreground="White" Height="45" Width="45" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
             <!-- タイトル -->
             <Canvas Grid.Column="1">
-                <Label Content="TUMUGU" FontSize="22" FontFamily="Arial Black" Foreground="White" Margin="0,1,0,0"/>
-                <Label Content="- Markdown Editor -" FontSize="9" FontFamily="Arial Black" Foreground="WhiteSmoke" Margin="0,25,0,0"/>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Tu" FontSize="22" FontFamily="Arial Black" Foreground="White" Margin="0,1,0,0"/>
+                    <Label Content="m" FontSize="22" FontFamily="Arial Black" Foreground="SteelBlue" Margin="-7,1,0,0"/>
+                    <Label Content="ugu" FontSize="22" FontFamily="Arial Black" Foreground="white" Margin="-7,1,0,0"/>
+                </StackPanel>
+                <Label Content="- Markdown Editor -" FontSize="9" FontFamily="Arial Black" Foreground="WhiteSmoke" Margin="0,27,0,0"/>
             </Canvas>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button x:Name="BtnSave" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnMinimize_Click" ToolTip="最小化" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="ContentSave" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Button x:Name="BtnFolder" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="65" ToolTip="名前をつけて保存" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnFolder_Click">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Height="40" Width="65" >
+                        <materialDesign:PackIcon Kind="FolderOpen" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Label Content="名前をつけて保存" FontSize="8" Foreground="White" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+                    </StackPanel>
                 </Button>
-                <Button x:Name="BtnSaveAs" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnClose_Click" ToolTip="終了" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3">
-                    <materialDesign:PackIcon Kind="ContentSaveEdit" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Button x:Name="BtnSaveAs" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="60" ToolTip="上書き保存" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3" Click="BtnSaveAs_Click">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Height="40" Width="60" >
+                        <materialDesign:PackIcon Kind="FloppyDisk" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Label Content="上書き保存" FontSize="8" Foreground="White" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+                    </StackPanel>
                 </Button>
             </StackPanel>
 
@@ -72,10 +82,10 @@
                 <Button x:Name="BtnMinimize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnMinimize_Click" ToolTip="最小化" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Minus" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
-                <Button x:Name="BtnMaximize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" ToolTip="最小化" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnMaximize_Click">
+                <Button x:Name="BtnMaximize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" ToolTip="最大化" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnMaximize_Click">
                     <materialDesign:PackIcon Kind="WindowMaximize" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
-                <Button x:Name="BtnClose" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnClose_Click" ToolTip="終了" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3">
+                <Button x:Name="BtnClose" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnClose_Click" ToolTip="閉じる" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3">
                     <materialDesign:PackIcon Kind="Close" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
             </StackPanel>
@@ -95,9 +105,11 @@
             <!-- Markdownの入力TextBox -->
             <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A0A0A0" Background="White" BorderThickness="1" CornerRadius="4" Margin="10,10,1,10">
                 <RichTextBox x:Name="RichMarkdownTextBox" Grid.Row="0" Grid.Column="0" Background="White" Margin="5"
-                               VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True"
+                               HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True"
                             AllowDrop="True" TextChanged="RichTextBox_TextChanged" PreviewMouseWheel="RichMarkdownTextBox_PreviewMouseWheel"
-                            FontFamily="Consolas" FontSize="16" Drop="RichMarkdownTextBox_Drop" PreviewDragOver="RichMarkdownTextBox_PreviewDragOver" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            FontFamily="Consolas" FontSize="16" Drop="RichMarkdownTextBox_Drop" PreviewDragOver="RichMarkdownTextBox_PreviewDragOver">
                     <RichTextBox.Resources>
                         <Style TargetType="{x:Type Paragraph}">
                             <Setter Property="LineHeight" Value="16" />
@@ -112,7 +124,7 @@
             </Border>
 
             <!-- TextBoxとWebView2の中央に左右の画面サイズ変更のため配置 -->
-            <GridSplitter Grid.Row="1" Grid.Column="1" Width="6" HorizontalAlignment="Center">
+            <!--<GridSplitter Grid.Row="1" Grid.Column="1" Width="6" HorizontalAlignment="Center">
                 <GridSplitter.Style>
                     <Style TargetType="GridSplitter">
                         <Setter Property="Background" Value="Transparent"/>
@@ -124,7 +136,7 @@
                         </Style.Triggers>
                     </Style>
                 </GridSplitter.Style>
-            </GridSplitter>
+            </GridSplitter>-->
 
             <!-- MarkdownのPreview(HTML) -->
             <!-- MarkdownをHTMLで表示するため、NugetからMicrosoft.Web.WebView2をインストール -->
@@ -136,16 +148,19 @@
 
         <Grid Grid.Row="2" Height="30" Background="#414141">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0 評価版" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>
+            <Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <CheckBox x:Name="chkSimpleEdit" Content="軽量モード" Foreground="White" Background="AliceBlue" VerticalAlignment="Center" Margin="0,0,10,0" IsChecked="True" Checked="chkSimpleEdit_Checked" Unchecked="chkSimpleEdit_Unchecked" />
                 <Button x:Name="Btn0Percent" Content="なし" Width="70" Height="25" Background="DarkGray" Click="Btn0Percent_Click" />
                 <Button x:Name="Btn25Percent" Content="25%" Width="70" Height="25" Background="DarkGray" Click="Btn25Percent_Click"></Button>
                 <Button x:Name="Btn50Percent" Content="50%" Width="70" Height="25" Background="DarkGray" Click="Btn50Percent_Click"></Button>
+                <Label Content="対象ファイル：" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <Label x:Name="lblEditFile" Content="C:¥Temp\..." Foreground="White" VerticalAlignment="Center" />
             </StackPanel>
         </Grid>
     </Grid>
