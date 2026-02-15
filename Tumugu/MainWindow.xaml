@@ -50,14 +50,14 @@
             <materialDesign:PackIcon Kind="ChartBubble" Grid.Column="0" Foreground="White" Height="45" Width="45" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
             <!-- タイトル -->
-            <Canvas Grid.Column="1">
-                <StackPanel Orientation="Horizontal">
+            <!--<Canvas Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left">-->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <Label Content="Tu" FontSize="22" FontFamily="Arial Black" Foreground="White" Margin="0,1,0,0"/>
                     <Label Content="m" FontSize="22" FontFamily="Arial Black" Foreground="SteelBlue" Margin="-7,1,0,0"/>
                     <Label Content="ugu" FontSize="22" FontFamily="Arial Black" Foreground="white" Margin="-7,1,0,0"/>
                 </StackPanel>
-                <Label Content="- Markdown Editor -" FontSize="9" FontFamily="Arial Black" Foreground="WhiteSmoke" Margin="0,27,0,0"/>
-            </Canvas>
+                <!--<Label Content="- Markdown Editor -" FontSize="9" FontFamily="Arial Black" Foreground="WhiteSmoke" Margin="0,27,0,0"/>-->
+            <!--</Canvas>-->
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button x:Name="BtnFolder" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="65" ToolTip="名前をつけて保存" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnFolder_Click">
@@ -142,7 +142,7 @@ VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsR
             <!-- MarkdownをHTMLで表示するため、NugetからMicrosoft.Web.WebView2をインストール -->
             <Border Grid.Row="1" Grid.Column="2" BorderBrush="#A0A0A0" Background="{x:Null}"
                 Panel.ZIndex="1" BorderThickness="1" CornerRadius="4" Margin="0, 10, 10, 10">
-                <wv2:WebView2 x:Name="MarkdownBrowser" AllowDrop="False" Cursor="Arrow" Panel.ZIndex="2" Margin="5" DragOver="MarkdownBrowser_DragOver"/>
+                <wv2:WebView2 x:Name="MarkdownBrowser" AllowDrop="False" Cursor="Arrow" Panel.ZIndex="2" Margin="5" Visibility="Hidden" DragOver="MarkdownBrowser_DragOver"/>
             </Border>
         </Grid>
 
