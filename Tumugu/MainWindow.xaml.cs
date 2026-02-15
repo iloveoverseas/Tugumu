@@ -107,6 +107,8 @@ namespace Tumugu
 
         private void MarkdownBrowser_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
         {
+            MarkdownBrowser.Visibility = Visibility.Visible;
+
             // 右クリックイベントをフック
             MarkdownBrowser.CoreWebView2.ContextMenuRequested += CoreWebView2_ContextMenuRequested;
         }
