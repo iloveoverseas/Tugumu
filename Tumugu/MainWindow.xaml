@@ -80,13 +80,13 @@
             <!-- ウィンドウのボタン -->
             <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="BtnMinimize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnMinimize_Click" ToolTip="最小化" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="Minus" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <materialDesign:PackIcon Kind="Minus" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
                 <Button x:Name="BtnMaximize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" ToolTip="最大化" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnMaximize_Click">
-                    <materialDesign:PackIcon Kind="WindowMaximize" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <materialDesign:PackIcon Kind="WindowMaximize" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
                 <Button x:Name="BtnClose" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnClose_Click" ToolTip="閉じる" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3">
-                    <materialDesign:PackIcon Kind="Close" Foreground="White" Height="30" Width="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <materialDesign:PackIcon Kind="Close" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
             </StackPanel>
         </Grid>
@@ -148,17 +148,17 @@ VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsR
 
         <Grid Grid.Row="2" Height="30" Background="#414141">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>
+            <!--<Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>-->
+            <CheckBox x:Name="chkSimpleEdit" Grid.Column="0" Content="軽量モード" Foreground="White" Background="AliceBlue" VerticalAlignment="Center" Margin="0,0,10,0" IsChecked="True" Checked="chkSimpleEdit_Checked" Unchecked="chkSimpleEdit_Unchecked" />
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <CheckBox x:Name="chkSimpleEdit" Content="軽量モード" Foreground="White" Background="AliceBlue" VerticalAlignment="Center" Margin="0,0,10,0" IsChecked="True" Checked="chkSimpleEdit_Checked" Unchecked="chkSimpleEdit_Unchecked" />
-                <Button x:Name="Btn0Percent" Content="なし" Width="70" Height="25" Background="DarkGray" Click="Btn0Percent_Click" />
-                <Button x:Name="Btn25Percent" Content="25%" Width="70" Height="25" Background="DarkGray" Click="Btn25Percent_Click"></Button>
-                <Button x:Name="Btn50Percent" Content="50%" Width="70" Height="25" Background="DarkGray" Click="Btn50Percent_Click"></Button>
+                <Button x:Name="Btn0Percent" Content="なし" Width="60" Height="25" Background="LightGray" Click="Btn0Percent_Click" />
+                <Button x:Name="Btn25Percent" Content="25%" Width="60" Height="25" Background="LightGray" Click="Btn25Percent_Click" Margin="5,0,5,0"></Button>
+                <Button x:Name="Btn50Percent" Content="50%" Width="60" Height="25" Background="LightGray" Click="Btn50Percent_Click"></Button>
                 <Label Content="対象ファイル：" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
                 <Label x:Name="lblEditFile" Content="C:¥Temp\..." Foreground="White" VerticalAlignment="Center" />
             </StackPanel>
