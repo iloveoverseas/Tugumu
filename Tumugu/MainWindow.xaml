@@ -20,6 +20,86 @@
          その高さ分だけ 上部に空白が強制的に入ります。
          解決策：CaptionHeight="0" を明示的に指定する
     -->
+    <Window.Resources>
+        <Style x:Key="ButtonDefault" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="0" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="DimGray"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CloseButtonFadeStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <!--<Grid x:Name="RootGrid" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>-->
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="0" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="DarkRed"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ButtonSub" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="WhiteSmoke"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="DarkGray" BorderThickness="1" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
     <WindowChrome.WindowChrome>
         <WindowChrome
@@ -41,7 +121,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="180"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="125"/>
             </Grid.ColumnDefinitions>
@@ -52,41 +132,41 @@
             <!-- タイトル -->
             <!--<Canvas Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left">-->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Label Content="Tu" FontSize="22" FontFamily="Arial Black" Foreground="White" Margin="0,1,0,0"/>
-                    <Label Content="m" FontSize="22" FontFamily="Arial Black" Foreground="SteelBlue" Margin="-7,1,0,0"/>
-                    <Label Content="ugu" FontSize="22" FontFamily="Arial Black" Foreground="white" Margin="-7,1,0,0"/>
-                </StackPanel>
-                <!--<Label Content="- Markdown Editor -" FontSize="9" FontFamily="Arial Black" Foreground="WhiteSmoke" Margin="0,27,0,0"/>-->
+                <Label Content="Tu" FontSize="22" FontFamily="Arial Black" Foreground="White" Margin="0,1,0,0"/>
+                <Label Content="m" FontSize="22" FontFamily="Arial Black" Foreground="SteelBlue" Margin="-7,1,0,0"/>
+                <Label Content="ugu" FontSize="22" FontFamily="Arial Black" Foreground="white" Margin="-7,1,0,0"/>
+            </StackPanel>
+            <!--<Label Content="- Markdown Editor -" FontSize="9" FontFamily="Arial Black" Foreground="WhiteSmoke" Margin="0,27,0,0"/>-->
             <!--</Canvas>-->
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button x:Name="BtnFolder" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="65" ToolTip="名前をつけて保存" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnFolder_Click">
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Height="40" Width="65" >
+                <Button x:Name="BtnFolder" Style="{StaticResource ButtonDefault}" Width="75" ToolTip="名前をつけて保存" VerticalAlignment="Center" Click="BtnFolder_Click">
+                    <StackPanel Orientation="Vertical">
                         <materialDesign:PackIcon Kind="FolderOpen" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <Label Content="名前をつけて保存" FontSize="8" Foreground="White" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+                        <Label Content="名前をつけて保存" FontSize="8" Foreground="White" HorizontalAlignment="Center" Margin="0,-2,0,0" Width="70"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="BtnSaveAs" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="60" ToolTip="上書き保存" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3" Click="BtnSaveAs_Click">
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Height="40" Width="60" >
+                <Button x:Name="BtnSaveAs" Style="{StaticResource ButtonDefault}" Width="75" ToolTip="上書き保存" Margin="3" Click="BtnSaveAs_Click">
+                    <StackPanel Orientation="Vertical">
                         <materialDesign:PackIcon Kind="FloppyDisk" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <Label Content="上書き保存" FontSize="8" Foreground="White" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+                        <Label Content="上書き保存" FontSize="8" Foreground="White" Margin="0,-2,0,0" Width="50" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </StackPanel>
 
             <Label x:Name="lblTitleBlankArea" Grid.Column="3" Background="Transparent" HorizontalAlignment="Stretch" 
-                       VerticalAlignment="Stretch" MouseDoubleClick="lblTitleBlankArea_MouseDoubleClick" />
+                       VerticalAlignment="Stretch" MouseDoubleClick="LblTitleBlankArea_MouseDoubleClick" />
 
             <!-- ウィンドウのボタン -->
-            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="BtnMinimize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnMinimize_Click" ToolTip="最小化" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="BtnMinimize" Style="{StaticResource ButtonDefault}" Click="BtnMinimize_Click" ToolTip="最小化" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Minus" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
-                <Button x:Name="BtnMaximize" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" ToolTip="最大化" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnMaximize_Click">
+                <Button x:Name="BtnMaximize" Style="{StaticResource ButtonDefault}" ToolTip="最大化" HorizontalAlignment="Center" VerticalAlignment="Center" Click="BtnMaximize_Click">
                     <materialDesign:PackIcon Kind="WindowMaximize" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
-                <Button x:Name="BtnClose" Style="{DynamicResource MaterialDesignToolButton}" Height="40" Width="40" Click="BtnClose_Click" ToolTip="閉じる" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="3">
-                    <materialDesign:PackIcon Kind="Close" Foreground="White" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Button x:Name="BtnClose" Style="{StaticResource CloseButtonFadeStyle}" Click="BtnClose_Click" ToolTip="閉じる" HorizontalAlignment="Center" VerticalAlignment="Center" MouseEnter="BtnClose_MouseEnter" MouseLeave="BtnClose_MouseLeave">
+                    <materialDesign:PackIcon Kind="Close" Height="25" Width="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Button>
             </StackPanel>
         </Grid>
@@ -105,9 +185,8 @@
             <!-- Markdownの入力TextBox -->
             <Border Grid.Row="0" Grid.Column="0" BorderBrush="#A0A0A0" Background="White" BorderThickness="1" CornerRadius="4" Margin="10,10,1,10">
                 <RichTextBox x:Name="RichMarkdownTextBox" Grid.Row="0" Grid.Column="0" Background="White" Margin="5"
-                               HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                            VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True"
                             AllowDrop="True" TextChanged="RichTextBox_TextChanged" PreviewMouseWheel="RichMarkdownTextBox_PreviewMouseWheel"
                             FontFamily="Consolas" FontSize="16" Drop="RichMarkdownTextBox_Drop" PreviewDragOver="RichMarkdownTextBox_PreviewDragOver">
                     <RichTextBox.Resources>
@@ -152,13 +231,12 @@ VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" AcceptsR
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!--<Label Grid.Column="0" x:Name="lblVersion" Content="Ver 1.0.0" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>-->
             <CheckBox x:Name="chkSimpleEdit" Grid.Column="0" Content="軽量モード" Foreground="White" Background="AliceBlue" VerticalAlignment="Center" Margin="0,0,10,0" IsChecked="True" Checked="chkSimpleEdit_Checked" Unchecked="chkSimpleEdit_Unchecked" />
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button x:Name="Btn0Percent" Content="なし" Width="60" Height="25" Background="LightGray" Click="Btn0Percent_Click" />
-                <Button x:Name="Btn25Percent" Content="25%" Width="60" Height="25" Background="LightGray" Click="Btn25Percent_Click" Margin="5,0,5,0"></Button>
-                <Button x:Name="Btn50Percent" Content="50%" Width="60" Height="25" Background="LightGray" Click="Btn50Percent_Click"></Button>
+                <Button x:Name="Btn0Percent" Content="なし" Style="{StaticResource ButtonSub}" Click="Btn0Percent_Click" />
+                <Button x:Name="Btn25Percent" Content="25%" Style="{StaticResource ButtonSub}" Click="Btn25Percent_Click" Margin="5,0,5,0"/>
+                <Button x:Name="Btn50Percent" Content="50%" Style="{StaticResource ButtonSub}" Click="Btn50Percent_Click"/>
                 <Label Content="対象ファイル：" Foreground="White" VerticalAlignment="Center" Margin="10,0,0,0"/>
                 <Label x:Name="lblEditFile" Content="C:¥Temp\..." Foreground="White" VerticalAlignment="Center" />
             </StackPanel>
