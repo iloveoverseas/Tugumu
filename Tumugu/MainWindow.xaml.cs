@@ -3,7 +3,6 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -76,7 +75,7 @@ namespace Tumugu
             ");
         }
 
-        private void lblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void LblTitleBlankArea_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ChangeWindowStage();
 
@@ -120,7 +119,7 @@ namespace Tumugu
             var menu = new System.Windows.Controls.ContextMenu();
 
             var printItem = new System.Windows.Controls.MenuItem();
-            printItem.Header = "印刷";
+            printItem.Header = "Markdownとして印刷";
             printItem.Click += (s, ev) =>
             {
                 MarkdownBrowser.CoreWebView2.ShowPrintUI();
@@ -542,20 +541,27 @@ namespace Tumugu
                 }
             }
 
-
             RewriteMarkdownBrowser();
         }
 
         private void RichMarkdownTextBox_PreviewDragOver(object sender, DragEventArgs e)
         {
-            // ドロップされたものが「ファイル」である場合のみ、受け入れを許可するアイコンにする
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            int acceptDrugFileCount = 1; // ドロップを受け入れるファイルの数（ここでは1つだけ）
+
+            var drugFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            string drugFileFullPath = drugFiles[0];
+
+            // ファイルが1つだけで、拡張子が .md なら受け入れ
+            if (drugFiles.Length == acceptDrugFileCount && Path.GetExtension(drugFileFullPath) == ".md")
             {
                 e.Effects = DragDropEffects.Copy;
+                Mouse.OverrideCursor = Cursors.Hand;
             }
             else
             {
                 e.Effects = DragDropEffects.None;
+                Mouse.OverrideCursor = null;
             }
 
             // イベントを完了（標準の動作を抑制）
@@ -644,5 +650,16 @@ namespace Tumugu
             }
         }
 
+        private void BtnClose_MouseEnter(object sender, MouseEventArgs e)
+        {
+            BtnClose.Background = Brushes.IndianRed;
+            BtnClose.Foreground = Brushes.White;
+        }
+
+        private void BtnClose_MouseLeave(object sender, MouseEventArgs e)
+        {
+            BtnClose.Background = Brushes.Transparent;
+            BtnClose.Foreground = Brushes.White;
+        }
     }
 }
